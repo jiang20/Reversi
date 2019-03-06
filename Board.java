@@ -15,10 +15,7 @@ public class Board {
         for(int i = 0; i < this.size + 1; i++){
             for(int j = 0; j < this.size + 1; j++){
                 if(i == 0) {
-                    if (j == 0)
-                        board[i][j] = ' ';
-                    else
-                        board[i][j] = (char) ('a' + j - 1);
+                    board[i][j] = (j == 0)?' ':(char) ('a' + j - 1);
                 }
                 else if(j == 0)
                     board[i][j] = (char)('a' + i - 1);
@@ -38,8 +35,6 @@ public class Board {
     public void setSize(int size){
         this.size = size;
     }
-    public void setBoard(){}
-
     public void begin() throws IOException {
         for(int i = 0 ; i <= size; i ++){
             for(int j = 0; j <= size; j++){
@@ -151,52 +146,6 @@ public class Board {
                 return;
             }
         }
-//        aaa:while (true) {
-//            char[] place ;
-//
-//            place = black.place(board) ;
-//            if(!black.isRight(place,board)){
-//                outResult('X',4);
-//                break aaa;
-//            }
-//            while(!white.isOverBefore(board)){
-//                outResult('O',3);
-//                place = black.place(board);
-//                if(!black.isRight(place,board)){
-//                    outResult('X',4);
-//                    break aaa;
-//                }
-//            }
-//            place = white.place(board);
-//            if(!white.isRight(place,board)){
-//                outResult('O',4);
-//                break aaa;
-//            }
-//            while(black.isOverBefore(board)){
-//                if(black.getReason() == 2){
-//                    outResult('X',2);
-//                    return;
-//                }
-//                outResult('X',3);
-//                place = white.place(board);//这里不对
-//                if(!white.isRight(place,board)){
-//                    outResult('O',4);
-//                    break aaa;
-//                }
-//            }
-//            if(black.getNumber() == 0){
-//                outResult('X',2);
-//                break aaa;
-//            }
-//            else if(white.getNumber() == 0){
-//                outResult('O',2);
-//                break aaa;
-//            }
-//            if(black.getNumber() + white.getNumber() == size * size){
-//                outResult('*',1);
-//                break aaa;
-//            }
-//        }
     }
     public void outResult(char player,int reason) throws IOException {
         char player2 = (player == 'O') ? 'X' : 'O' ;
@@ -217,7 +166,7 @@ public class Board {
             System.out.print("X : O = " + black.getNumber()+" : "+white.getNumber()+"\n"+player2+" player wins.\n");
         }
         else if(reason == 3 ){
-            System.out.print(player+" player has no valid move. Enter move for "+player2+" (RowCol): ");
+            System.out.print(player+" player has no valid move. ");
 //            char[] place = new char[2];
 //            place[0] = input.next().charAt(0);
 //            place[1] = input.next().charAt(1);
