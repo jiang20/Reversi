@@ -3,7 +3,6 @@ package lab1;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Scanner;
 
 public class Chess {
     private char character;
@@ -41,6 +40,7 @@ public class Chess {
     public int getNumber(){
         return this.number;
     }
+    public int getOperation(){return this.operation;}
     public void setNumber(int number) {
         this.number = number;
     }
@@ -84,7 +84,6 @@ public class Chess {
                         }
                     }
                 }
-                System.out.print("666");
             }
             //place 是原有的位置，当它没有发生更新的时候，他会照常输出，所以关键是这个place的步骤不能执行的
             System.out.print("Computer places "+character+" at "+place[0]+place[1]+" \n");
@@ -94,10 +93,18 @@ public class Chess {
             System.out.print("Enter move for "+character+" (RowCol): ");
             BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
             String text = buffer.readLine();
+            if(text.length() != 2){
+                this.reason = 4;
+                return null;
+            }
             place[0] = text.charAt(0);
             place[1] = text.charAt(1);
             int i = place[0] - 'a';
             int j = place[1] - 'a';
+            if(i >= size || i < 0 || j >= size || j < 0){
+                this.reason = 4;
+                return null;
+            }
             if(board[i + 1][j + 1] != '.'){
                 this.reason = 4;
                 return null;

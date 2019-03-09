@@ -1,13 +1,21 @@
 package lab1;
 
 import java.io.IOException;
-import java.util.Scanner;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class Board {
     private int size;
     private char[][] board;
     private Chess black;
     private Chess white;
+    private int reason;
+    private long start;
+    private long end;
+    private int com;
+    private int loser;
+    private String date;
 
     Board(int size, Chess black, Chess white){
         this.size = size ;
@@ -27,6 +35,11 @@ public class Board {
         board[size / 2 + 1][size / 2] = board[size / 2 ][size / 2 + 1] = 'X';
         this.black = black;
         this.white = white;
+        com = black.getOperation();
+        start = 0;
+        end = 0;
+        loser = 0;
+        date = null;
     }
 
     public int getSize(){
@@ -35,7 +48,19 @@ public class Board {
     public void setSize(int size){
         this.size = size;
     }
+    public int getReason(){return reason;}
+    public int getCom(){return com;}
+    public long getStart(){return start;}
+    public long getEnd(){return end;}
+    public Chess getBlack(){return black;}
+    public Chess getWhite(){return white;}
+    public int getLoser(){return loser;}
+    public String getDate(){return date;}
     public void begin() throws IOException {
+        Date dateNow = new Date();
+        DateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+        date = format.format(dateNow);
+        start = System.currentTimeMillis();
         for(int i = 0 ; i <= size; i ++){
             for(int j = 0; j <= size; j++){
                 System.out.print(board[i][j]);
@@ -88,7 +113,6 @@ public class Board {
             }
             place = black.place(board);
             white.setNumber(white.getNumber() - black.getNumOfChange());
-            System.out.print(black.getNumber()+"  he  "+white.getNumber());
             if(!black.isRight(place,board)){
                 outResult('X',4);
                 return;
@@ -98,7 +122,6 @@ public class Board {
                 return;
             }
             while(white.isOverBefore(board)){
-                System.out.print("\n why not? ");
                 black.isOverBefore(board);
                 if(white.getReason() == 2){
                     outResult('O',2);
@@ -124,9 +147,6 @@ public class Board {
                         white.setNumber(white.getNumber() - black.getNumOfChange());
                         if(!black.isRight(place,board))
                             outResult('X',4);
-//                        if(black.getReason() == 3){
-//                            outResult('*',3);
-//                        }
                         white.isOverBefore(board);
                         switch (white.getReason()){
                             case 2:outResult('O',2);
@@ -149,6 +169,7 @@ public class Board {
     }
     public void outResult(char player,int reason) throws IOException {
         char player2 = (player == 'O') ? 'X' : 'O' ;
+        loser = ((player == 'X')?black:white).getOperation();
         if(reason == 1){
             if(black.getNumber() > white.getNumber()){
                 player2 = 'X';
@@ -167,16 +188,11 @@ public class Board {
         }
         else if(reason == 3 ){
             System.out.print(player+" player has no valid move. ");
-//            char[] place = new char[2];
-//            place[0] = input.next().charAt(0);
-//            place[1] = input.next().charAt(1);
-//            if(player2 == 'X')
-//                black.place(board);
-//            else
-//                white.place(board);
         }
         else if(reason == 4){
             System.out.print("Invalid move.\nGame over\n"+player2+" player wins.\n");
         }
+        end = System.currentTimeMillis();
+        this.reason = reason;
     }//output the result
 }
