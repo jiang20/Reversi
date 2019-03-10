@@ -42,6 +42,7 @@ public class InFile {
         getFile(filename);
         setFile(filename,board);
     }
+    //创建Excel文件
     private static void getFile(String filename) throws IOException, WriteException {
         File file = new File(filename);
         WritableWorkbook writableWorkbook;
@@ -53,6 +54,7 @@ public class InFile {
             writableWorkbook.close();
         }
     }
+    //创建Excel文件的副本来进行修改
     private static void setFile(String filename,Board board){
         File file = new File(filename);
         Workbook workbook = null;
@@ -87,6 +89,7 @@ public class InFile {
             workbook.close();
         }
     }
+    //根据board得到应该输进文件中的内容
     private static String[] getRes(Board board){
         String[] strings = new String[6];
         strings[0] = board.getDate() +"";

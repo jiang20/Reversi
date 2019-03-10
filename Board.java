@@ -56,11 +56,12 @@ public class Board {
     public Chess getWhite(){return white;}
     public int getLoser(){return loser;}
     public String getDate(){return date;}
+    //开始下棋
     public void begin() throws IOException {
         Date dateNow = new Date();
         DateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
         date = format.format(dateNow);
-        start = System.currentTimeMillis();
+        start = System.currentTimeMillis();//开始时间
         for(int i = 0 ; i <= size; i ++){
             for(int j = 0; j <= size; j++){
                 System.out.print(board[i][j]);
@@ -69,7 +70,7 @@ public class Board {
             }
         }
         char[] place;
-        while (true){
+        while (true){//按照步骤进行
             if(black.getNumber() + white.getNumber() == size * size && black.getNumber() != 0 && white.getNumber() != 0) {
                 outResult('*', 1);
                 return;
@@ -98,11 +99,13 @@ public class Board {
                         outResult('X',3);
                         place = white.place(board);
                         black.setNumber(black.getNumber() - white.getNumOfChange());
-                        if(!white.isRight(place,board))
-                            outResult('O',4);
+                        if(!white.isRight(place,board)) {
+                            outResult('O', 4);
+                            return;
 //                        if(white.getReason() == 3){
 //                            outResult('*',3);
 //                        }
+                        }
                         black.isOverBefore(board);
                         switch (black.getReason()){
                             case 2:outResult('X',2);return;
@@ -145,12 +148,14 @@ public class Board {
                         outResult('O',3);
                         place = black.place(board);
                         white.setNumber(white.getNumber() - black.getNumOfChange());
-                        if(!black.isRight(place,board))
-                            outResult('X',4);
+                        if(!black.isRight(place,board)) {
+                            outResult('X', 4);
+                            return;
+                        }
                         white.isOverBefore(board);
                         switch (white.getReason()){
-                            case 2:outResult('O',2);
-                            case 3:outResult('*',3);
+                            case 2:outResult('O',2);return;
+                            case 3:outResult('*',3);return;
                         }
                     }
                 }
@@ -167,6 +172,7 @@ public class Board {
             }
         }
     }
+    //显示出结果
     public void outResult(char player,int reason) throws IOException {
         char player2 = (player == 'O') ? 'X' : 'O' ;
         loser = ((player == 'X')?black:white).getOperation();
@@ -184,6 +190,7 @@ public class Board {
         }
         else if(reason == 3 && player == '*'){
             System.out.print("Both players have no valid move.\nGame over\n");
+            player2 = (black.getNumber() > white.getNumber())?'X':'O';
             System.out.print("X : O = " + black.getNumber()+" : "+white.getNumber()+"\n"+player2+" player wins.\n");
         }
         else if(reason == 3 ){

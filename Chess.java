@@ -56,11 +56,11 @@ public class Chess {
     public void setSize(int size){
         this.size = size;
     }
-    public char[] place(char[][] board) throws IOException {//place应该有确定计算机是否有位置
+    public char[] place(char[][] board) throws IOException {//place改变棋盘
         int[] rowNum = {-2, 0, 2};
         int[] colNum = {-2, 0, 2};
         int amount = 0;
-        if(operation == 1) {
+        if(operation == 1) {//当操作者是计算机的时候找到正确位置并改变number和numofchange
             Boolean isRight = false;
             for (int i = 1; i <= size; i++) {
                 for (int j = 1; j <= size; j++) {
@@ -88,7 +88,7 @@ public class Chess {
             //place 是原有的位置，当它没有发生更新的时候，他会照常输出，所以关键是这个place的步骤不能执行的
             System.out.print("Computer places "+character+" at "+place[0]+place[1]+" \n");
         }
-        else{
+        else{//当操作者是人的时候，根据输入的值进行判断和输入
             int tmp = 0;
             System.out.print("Enter move for "+character+" (RowCol): ");
             BufferedReader buffer = new BufferedReader(new InputStreamReader(System.in));
@@ -152,13 +152,14 @@ public class Chess {
         numOfChange = amount;
         return place;
     }//output where to put the next,if out is null,it means no place
+    //judge whether it is legal
     public Boolean isRight(char[] place,char[][] board){//只需要对人工进行检测；当计算机过来isOverBefor的关卡，那么在这里肯定是正确的
         if(operation == 1)
             return true;
         if(reason == 4)//place的位置是要加入棋子的位置
             return false;
         return true;
-    }//judge whether it is legal
+    }//判断是否还有位置
     private Boolean find(char[] place,char[][] board){
         char row = place[0];
         char col = place[1];
@@ -185,6 +186,7 @@ public class Chess {
     public void setReason(int reason){
         this.reason = reason;
     }
+    //有棋盘满和自己没有位置可下的两种情况
     public Boolean isOverBefore(char[][] board){//judge whether it is over on this side
         if(this.getNumber() == 0) {//当对方输出之后判断的情况，不考虑自己输入之后的情况
             setReason(2);
@@ -208,7 +210,4 @@ public class Chess {
 //        return false;
         return reason == 3;
     }
-//    public void over(){}//output the result on thr base of "reason"
-//    把这个输出留给board做总结
-    public void writeIn(){}//write the result in the file
 }
