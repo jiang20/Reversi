@@ -11,8 +11,12 @@ public class Main {
         int size ;
         char com;
         Scanner input = new Scanner(System.in);
-        System.out.print("Enter the board dimension:  ");
+        System.out.print("Enter the board dimension(4-10)(even):  ");
         size = input.nextInt();
+        while (!(size >= 4 && size <= 10 && size % 2 == 0)){
+            System.out.print("请输入正确的形式(4-10)(even):  ");
+            size = input.nextInt();
+        }
         System.out.print("Computer plays (X/O):  ");
         com = input.next().charAt(0);
         while (com != 'X' && com != 'O'){
