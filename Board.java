@@ -8,198 +8,147 @@ import java.util.Date;
 public class Board {
     private int size;
     private char[][] board;
-    private Chess black;
-    private Chess white;
-    private int reason;
+    private Computer computer;
+    private Human human;
     private long start;
     private long end;
-    private int com;
     private int loser;
     private String date;
+    private static String turn;
+    private static final String CPU = "computer";
+    private static final String HUMAN = "human";
+    private StringBuffer end_remark = new StringBuffer();
+    private StringBuffer out_remark = new StringBuffer();
 
-    Board(int size, Chess black, Chess white){
+    Board(int size, Computer computer, Human human){
         this.size = size ;
-        board = new char[this.size + 1][this.size + 1];
-        for(int i = 0; i < this.size + 1; i++){
-            for(int j = 0; j < this.size + 1; j++){
-                if(i == 0) {
-                    board[i][j] = (j == 0)?' ':(char) ('a' + j - 1);
-                }
-                else if(j == 0)
-                    board[i][j] = (char)('a' + i - 1);
-                else
-                    board[i][j] = '.';
+        board = new char[size][size];
+        for(int i = 0; i < size ; i++){
+            for(int j = 0; j < size ; j++){
+                board[i][j] = '.';
             }
         }
-        board[size / 2][size / 2] = board[size / 2 + 1][size / 2 + 1] = 'O';
-        board[size / 2 + 1][size / 2] = board[size / 2 ][size / 2 + 1] = 'X';
-        this.black = black;
-        this.white = white;
-        com = black.getOperation();
+        board[( size - 1 )/ 2][( size - 1 )/ 2] = board[( size - 1 ) / 2 + 1][( size - 1 ) / 2 + 1] = 'O';
+        board[( size - 1 )/ 2 + 1][( size - 1 )/ 2] = board[( size - 1 )/ 2 ][( size - 1 ) / 2 + 1] = 'X';
+        this.computer = computer;
+        this.human = human;
+
         start = 0;
         end = 0;
         loser = 0;
-        date = null;
+        if(this.computer.getCharacter() == 'X')
+            turn = CPU;
+        else
+            turn = HUMAN;
     }
 
-    public int getSize(){
-        return size;
-    }
-    public void setSize(int size){
-        this.size = size;
-    }
-    public int getReason(){return reason;}
-    public int getCom(){return com;}
-    public long getStart(){return start;}
-    public long getEnd(){return end;}
-    public Chess getBlack(){return black;}
-    public Chess getWhite(){return white;}
-    public int getLoser(){return loser;}
-    public String getDate(){return date;}
-    //开始下棋
+    /*下棋过程*/
     public void begin() throws IOException {
-        Date dateNow = new Date();
-        DateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
-        date = format.format(dateNow);
-        start = System.currentTimeMillis();//开始时间
-        for(int i = 0 ; i <= size; i ++){
-            for(int j = 0; j <= size; j++){
+        setDate();
+        start = System.currentTimeMillis();
+        printTable();
+        is_not_finished:for(;!is_finished();) {
+            switch (turn) {
+                case CPU:
+                    computer.place(board);
+                    printTable();
+                    change_other_number(computer,human);
+                    setTurn(HUMAN);
+                    break;
+                case HUMAN:
+                    human.place(board);
+                    if (human.isIf_give_up())
+                        break is_not_finished;
+                    change_other_number(human, computer);
+                    printTable();
+                    setTurn(CPU);
+                    break;
+                default:
+                    break;
+            }
+        }
+        show_winner();
+        end = System.currentTimeMillis();
+    }
+
+    /*输出棋盘*/
+    private void printTable(){
+        for(int i = 0 ; i < size; i ++){
+            for(int j = 0; j < size; j++){
                 System.out.print(board[i][j]);
-                if( j == size)
+                if( j == size - 1)
                     System.out.print("\n");
             }
         }
-        char[] place;
-        while (true){//按照步骤进行
-            if(black.getNumber() + white.getNumber() == size * size && black.getNumber() != 0 && white.getNumber() != 0) {
-                outResult('*', 1);
-                return;
-            }
-            while(black.isOverBefore(board)){
-                white.isOverBefore(board);
-                if(black.getReason() == 2){
-                    outResult('X',2);
-                    return;
-                }
-                else if(black.getReason() == 3 && white.getReason() == 3) {
-                    outResult('*', 3);
-                    return;
-                }
-                else if(black.getReason() == 3) {
-                    while (black.getReason() == 3){
-                        if(black.getNumber() + white.getNumber() == size * size && black.getNumber() != 0 && white.getNumber() != 0) {
-                            outResult('*', 1);
-                            return;
-                        }
-                        white.isOverBefore(board);
-                        switch (white.getReason()){
-                            case 2:outResult('O',2);return;
-                            case 3:outResult('*',3);return;
-                        }
-                        outResult('X',3);
-                        place = white.place(board);
-                        black.setNumber(black.getNumber() - white.getNumOfChange());
-                        if(!white.isRight(place,board)) {
-                            outResult('O', 4);
-                            return;
-//                        if(white.getReason() == 3){
-//                            outResult('*',3);
-//                        }
-                        }
-                        black.isOverBefore(board);
-                        switch (black.getReason()){
-                            case 2:outResult('X',2);return;
-                            case 3:break;
-                        }
-                    }
-                }
-            }
-            place = black.place(board);
-            white.setNumber(white.getNumber() - black.getNumOfChange());
-            if(!black.isRight(place,board)){
-                outResult('X',4);
-                return;
-            }
-            if(black.getNumber() + white.getNumber() == size * size && black.getNumber() != 0 && white.getNumber() != 0) {
-                outResult('*', 1);
-                return;
-            }
-            while(white.isOverBefore(board)){
-                black.isOverBefore(board);
-                if(white.getReason() == 2){
-                    outResult('O',2);
-                    return;
-                }
-                else if(white.getReason() == 3 && black.getReason() == 3){
-                    outResult('*',3);
-                    return;
-                }
-                else if(white.getReason() == 3) {
-                    while (white.getReason() == 3){
-                        if(white.getNumber() + black.getNumber() == size * size && black.getNumber() != 0 && white.getNumber() != 0) {
-                            outResult('*', 1);
-                            return;
-                        }
-                        black.isOverBefore(board);
-                        switch (black.getReason()){
-                            case 2:outResult('X',2);return;
-                            case 3:outResult('*',3);return;
-                        }
-                        outResult('O',3);
-                        place = black.place(board);
-                        white.setNumber(white.getNumber() - black.getNumOfChange());
-                        if(!black.isRight(place,board)) {
-                            outResult('X', 4);
-                            return;
-                        }
-                        white.isOverBefore(board);
-                        switch (white.getReason()){
-                            case 2:outResult('O',2);return;
-                            case 3:outResult('*',3);return;
-                        }
-                    }
-                }
-            }
-            place = white.place(board);
-            black.setNumber(black.getNumber() - white.getNumOfChange());
-            if(!white.isRight(place,board)){
-                outResult('O',4);
-                return;
-            }
-            if(black.getNumber() + white.getNumber() == size * size && black.getNumber() != 0 && white.getNumber() != 0) {
-                outResult('*', 1);
-                return;
-            }
-        }
     }
-    //显示出结果
-    public void outResult(char player,int reason) throws IOException {
-        char player2 = (player == 'O') ? 'X' : 'O' ;
-        loser = ((player == 'X')?black:white).getOperation();
-        if(reason == 1){
-            if(black.getNumber() > white.getNumber()){
-                player2 = 'X';
+
+    /*判断棋局是否结束*/
+    private boolean is_finished(){
+        /*棋盘满了*/
+        if(computer.getNumber() + human.getNumber() == size * size){
+            end_remark.append("The board is full\n");
+            return true;
+        }
+        /*一方数目为0*/
+        else if(computer.getNumber() == 0 || human.getNumber() == 0){
+            return true;
+        }
+        /*两方均无处可下*/
+         else if(computer.isOverBefore(board) && human.isOverBefore(board)){
+            end_remark.append("Both players have no valid place\n");
+            return true;
+        }
+        /*判断human是否放弃*/
+
+        return false;
+    }
+
+    /*输出结局*/
+    private void show_winner(){
+        if(human.isIf_give_up()) {
+            end_remark.append( human.getCharacter() + " give up. " + computer.getCharacter() + " wins.");
+            out_remark.append("Human give up");
+        }else {
+            switch (computer.getCharacter()) {
+                case 'X':
+                    end_remark.append("X : O = " + computer.getNumber() + " : " + human.getNumber());
+                    out_remark.append(computer.getNumber() + " : "+human.getNumber());
+                    break;
+                case 'O':
+                    end_remark.append("X : 0 = " + human.getNumber() + " : " + computer.getNumber());
+                    out_remark.append(human.getNumber() + " : " + computer.getNumber());
+                    break;
+                default:
+                    break;
             }
-            else
-                player2 = 'O';
-            System.out.print("The board is full.\nGame over.\n");
-            System.out.print("X : O = " + black.getNumber()+" : "+white.getNumber()+"\n"+player2+" player wins.\n");
+            end_remark .append("\n" +( (computer.getNumber() > human.getNumber()) ? "X" : "O" + " wins."));
         }
-        else if(reason == 2){
-            System.out.print(player+" has no piece on the board.\nGame over.\n"+ player2 +" player wins.\n");
-        }
-        else if(reason == 3 && player == '*'){
-            System.out.print("Both players have no valid move.\nGame over\n");
-            player2 = (black.getNumber() > white.getNumber())?'X':'O';
-            System.out.print("X : O = " + black.getNumber()+" : "+white.getNumber()+"\n"+player2+" player wins.\n");
-        }
-        else if(reason == 3 ){
-            System.out.print(player+" player has no valid move. ");
-        }
-        else if(reason == 4){
-            System.out.print("Invalid move.\nGame over\n"+player2+" player wins.\n");
-        }
-        end = System.currentTimeMillis();
-        this.reason = reason;
-    }//output the result
+        System.out.println(end_remark);
+    }
+
+    private void change_other_number(Chess winner, Chess loser){
+        loser.setNumber(loser.getNumber() - winner.getNumOfChange());
+    }
+
+    public int getSize(){ return size; }
+    public void setSize(int size){ this.size = size; }
+    public long getStart(){return start;}
+    public long getEnd(){return end;}
+    public int getLoser(){return loser;}
+    public void setTurn(String turn){ this.turn = turn; }
+    public String getDate(){return date;}
+    public void setDate(){
+        Date dateNow = new Date();
+        DateFormat format = new SimpleDateFormat("yyyyMMdd HH:mm:ss");
+        date = format.format(dateNow);
+    }
+
+    public Computer getComputer() {
+        return computer;
+    }
+
+    private StringBuffer getEnd_remark() {
+        return end_remark;
+    }
+    public StringBuffer getOut_remark(){return out_remark;}
 }
